@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCQ Generator - AI-Powered Quiz Creation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .file-upload input[type=file] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .quiz-section {
+            display: none;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .question {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+
+        .question h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #28a745;
+            color: white;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #dc3545;
+            color: white;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e8f4fd;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .score-section {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .score {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .grade {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            color: #666;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #c3e6cb;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 MCQ Generator</h1>
+            <p>AI-Powered Multiple Choice Question Creation from Your Content</p>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>📝 Input Content</h2>
+                <div class="input-section">
+                    <div class="form-group">
+                        <label for="contentType">Content Type:</label>
+                        <select id="contentType">
+                            <option value="text">Text Input</option>
+                            <option value="file">PDF File</option>
+                            <option value="url">Website URL</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="textInput">
+                        <label for="content">Content:</label>
+                        <textarea id="content" placeholder="Paste your educational content here..."></textarea>
+                    </div>
+
+                    <div class="form-group" id="fileInput" style="display: none;">
+                        <label>Upload PDF:</label>
+                        <div class="file-upload">
+                            <input type="file" id="pdfFile" accept=".pdf">
+                            <p>📄 Click to upload PDF file</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="urlInput" style="display: none;">
+                        <label for="url">Website URL:</label>
+                        <input type="url" id="url" placeholder="https://example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="numQuestions">Number of Questions:</label>
+                        <select id="numQuestions">
+                            <option value="5">5 Questions</option>
+                            <option value="10" selected>10 Questions</option>
+                            <option value="15">15 Questions</option>
+                            <option value="20">20 Questions</option>
+                        </select>
+                    </div>
+
+                    <button class="btn" id="generateBtn">🚀 Generate MCQs</button>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Generating questions... Please wait.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📊 Quiz Preview</h2>
+                <div id="quizPreview">
+                    <p style="text-align: center; color: #666; margin-top: 50px;">
+                        Generate questions to see the quiz preview here.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="quiz-section" id="quizSection">
+            <div class="quiz-container">
+                <div class="score-section" id="scoreSection" style="display: none;">
+                    <div class="score" id="score"></div>
+                    <div class="grade" id="grade"></div>
+                </div>
+
+                <div id="quizContainer"></div>
+
+                <div class="controls">
+                    <button class="btn" id="submitBtn">Submit Quiz</button>
+                    <button class="btn btn-secondary" id="resetBtn">Reset Quiz</button>
+                    <button class="btn btn-secondary" id="newQuizBtn">Generate New Quiz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentQuiz = null;
+        let userAnswers = {};
+
+        // DOM elements
+        const contentType = document.getElementById('contentType');
+        const textInput = document.getElementById('textInput');
+        const fileInput = document.getElementById('fileInput');
+        const urlInput = document.getElementById('urlInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const loading = document.getElementById('loading');
+        const quizSection = document.getElementById('quizSection');
+        const quizPreview = document.getElementById('quizPreview');
+        const quizContainer = document.getElementById('quizContainer');
+        const scoreSection = document.getElementById('scoreSection');
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const newQuizBtn = document.getElementById('newQuizBtn');
+
+        // Event listeners
+        contentType.addEventListener('change', toggleInputType);
+        generateBtn.addEventListener('click', generateMCQs);
+        submitBtn.addEventListener('click', submitQuiz);
+        resetBtn.addEventListener('click', resetQuiz);
+        newQuizBtn.addEventListener('click', () => {
+            quizSection.style.display = 'none';
+            document.querySelector('.main-content').style.display = 'grid';
+        });
+
+        function toggleInputType() {
+            const type = contentType.value;
+            textInput.style.display = type === 'text' ? 'block' : 'none';
+            fileInput.style.display = type === 'file' ? 'block' : 'none';
+            urlInput.style.display = type === 'url' ? 'block' : 'none';
+        }
+
+        async function generateMCQs() {
+            const type = contentType.value;
+            let content = '';
+
+            if (type === 'text') {
+                content = document.getElementById('content').value.trim();
+                if (!content) {
+                    showError('Please enter some content.');
+                    return;
+                }
+            } else if (type === 'file') {
+                const file = document.getElementById('pdfFile').files[0];
+                if (!file) {
+                    showError('Please select a PDF file.');
+                    return;
+                }
+            } else if (type === 'url') {
+                content = document.getElementById('url').value.trim();
+                if (!content) {
+                    showError('Please enter a URL.');
+                    return;
+                }
+            }
+
+            const numQuestions = document.getElementById('numQuestions').value;
+
+            // Show loading
+            generateBtn.disabled = true;
+            loading.style.display = 'block';
+
+            try {
+                let response, result;
+                if (type === 'file') {
+                    // PDF upload
+                    const formData = new FormData();
+                    formData.append('pdf', document.getElementById('pdfFile').files[0]);
+                    formData.append('numQuestions', numQuestions);
+                    response = await fetch('/api/generate-mcq-pdf', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    result = await response.json();
+                    if (result.mcqs) {
+                        currentQuiz = result.mcqs.slice(0, Number(numQuestions));
+                        displayQuizPreview(currentQuiz);
+                        showSuccess('MCQs generated successfully!');
+                    } else {
+                        showError(result.error || 'Failed to generate MCQs.');
+                    }
+                } else if (type === 'url') {
+                    // URL input
+                    response = await fetch('/api/generate-mcq-url', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: content, numQuestions: Number(numQuestions) })
+                    });
+                    result = await response.json();
+                    if (result.mcqs) {
+                        currentQuiz = result.mcqs.slice(0, Number(numQuestions));
+                        displayQuizPreview(currentQuiz);
+                        showSuccess('MCQs generated successfully!');
+                    } else {
+                        showError(result.error || 'Failed to generate MCQs.');
+                    }
+                } else if (type === 'text') {
+                    // Text input as subject
+                    response = await fetch('/api/generate-mcq-subject', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ subject: content, numQuestions: Number(numQuestions) })
+                    });
+                    result = await response.json();
+                    if (result.mcqs) {
+                        currentQuiz = result.mcqs.slice(0, Number(numQuestions));
+                        displayQuizPreview(currentQuiz);
+                        showSuccess('MCQs generated successfully!');
+                    } else {
+                        showError(result.error || 'Failed to generate MCQs.');
+                    }
+                }
+            } catch (error) {
+                showError('An error occurred while generating MCQs.');
+                console.error('Error:', error);
+            } finally {
+                generateBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayQuizPreview(mcqs) {
+            quizPreview.innerHTML = `
+                <h3>Generated ${mcqs.length} Questions</h3>
+                <div style="margin-top: 20px;">
+                    ${mcqs.slice(0, 3).map((q, index) => `
+                        <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                            <strong>Q${index + 1}:</strong> ${q.question.substring(0, 100)}...
+                        </div>
+                    `).join('')}
+                    ${mcqs.length > 3 ? `<p style="text-align: center; color: #666;">... and ${mcqs.length - 3} more questions</p>` : ''}
+                </div>
+                <button class="btn" onclick="startQuiz()" style="margin-top: 20px; width: 100%;">Start Quiz</button>
+            `;
+        }
+
+        function startQuiz() {
+            document.querySelector('.main-content').style.display = 'none';
+            quizSection.style.display = 'block';
+            displayQuiz();
+        }
+
+        function displayQuiz() {
+            if (!currentQuiz) return;
+
+            quizContainer.innerHTML = currentQuiz.map((question, index) => `
+                <div class="question" data-question="${index}">
+                    <h3>Question ${index + 1}</h3>
+                    <p>${question.question}</p>
+                    <div class="options">
+                        ${question.options.map((option, optionIndex) => `
+                            <div class="option" onclick="selectOption(${index}, ${optionIndex})">
+                                <input type="radio" name="q${index}" value="${optionIndex}" id="q${index}o${optionIndex}">
+                                <label for="q${index}o${optionIndex}">${option}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="explanation" id="explanation${index}">
+                        <strong>Explanation:</strong> ${question.explanation}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectOption(questionIndex, optionIndex) {
+            userAnswers[questionIndex] = optionIndex;
+            
+            // Update visual selection
+            const question = document.querySelector(`[data-question="${questionIndex}"]`);
+            question.querySelectorAll('.option').forEach((opt, index) => {
+                opt.classList.remove('selected');
+                if (index === optionIndex) {
+                    opt.classList.add('selected');
+                }
+            });
+        }
+
+        function submitQuiz() {
+            if (!currentQuiz) return;
+
+            const totalQuestions = currentQuiz.length;
+            const answeredQuestions = Object.keys(userAnswers).length;
+
+            if (answeredQuestions < totalQuestions) {
+                showError(`Please answer all questions. You've answered ${answeredQuestions} out of ${totalQuestions}.`);
+                return;
+            }
+
+            let correctAnswers = 0;
+            const explanations = document.querySelectorAll('.explanation');
+
+            currentQuiz.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const questionElement = document.querySelector(`[data-question="${index}"]`);
+                const options = questionElement.querySelectorAll('.option');
+                
+                // Find the correct answer by analyzing the explanation
+                const explanation = question.explanation.toLowerCase();
+                let detectedCorrectAnswer = question.correctAnswer; // fallback to backend value
+                let bestMatchScore = 0;
+                
+                // Check each option against the explanation
+                question.options.forEach((option, optionIndex) => {
+                    const optionText = option.toLowerCase();
+                    
+                    // Remove common words and focus on meaningful keywords
+                    const commonWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'this', 'that', 'these', 'those', 'it', 'its', 'they', 'them', 'their', 'we', 'us', 'our', 'you', 'your', 'he', 'she', 'his', 'her', 'i', 'my', 'me'];
+                    
+                    // Extract meaningful words from option
+                    const optionWords = optionText.split(/\s+/)
+                        .filter(word => word.length > 2 && !commonWords.includes(word))
+                        .map(word => word.replace(/[^\w]/g, '')); // Remove punctuation
+                    
+                    // Extract meaningful words from explanation
+                    const explanationWords = explanation.split(/\s+/)
+                        .filter(word => word.length > 2 && !commonWords.includes(word))
+                        .map(word => word.replace(/[^\w]/g, '')); // Remove punctuation
+                    
+                    // Count matches
+                    let matchCount = 0;
+                    optionWords.forEach(word => {
+                        if (explanationWords.includes(word)) {
+                            matchCount++;
+                        }
+                    });
+                    
+                    // Calculate match score (percentage of option words found in explanation)
+                    const matchScore = optionWords.length > 0 ? matchCount / optionWords.length : 0;
+                    
+                    // Update best match if this option has a higher score
+                    if (matchScore > bestMatchScore && matchScore > 0.3) { // Minimum 30% match threshold
+                        bestMatchScore = matchScore;
+                        detectedCorrectAnswer = optionIndex;
+                    }
+                    
+                    console.log(`Option ${optionIndex}: "${option}" - Match score: ${matchScore.toFixed(2)} (${matchCount}/${optionWords.length} words)`);
+                });
+                
+                console.log(`Question ${index + 1}: Detected correct answer as option ${detectedCorrectAnswer} with score ${bestMatchScore.toFixed(2)}`);
+
+                options.forEach((option, optionIndex) => {
+                    option.classList.remove('correct', 'incorrect');
+                    if (optionIndex === detectedCorrectAnswer) {
+                        option.classList.add('correct');
+                    } else if (optionIndex === userAnswer && userAnswer !== detectedCorrectAnswer) {
+                        option.classList.add('incorrect');
+                    }
+                });
+
+                if (userAnswer === detectedCorrectAnswer) {
+                    correctAnswers++;
+                }
+
+                explanations[index].style.display = 'block';
+            });
+
+            const score = Math.round((correctAnswers / totalQuestions) * 100);
+            const grade = getGrade(score);
+
+            scoreSection.style.display = 'block';
+            document.getElementById('score').textContent = `${correctAnswers}/${totalQuestions} (${score}%)`;
+            document.getElementById('grade').textContent = `Grade: ${grade}`;
+
+            submitBtn.disabled = true;
+        }
+
+        function getGrade(score) {
+            if (score >= 90) return 'A+';
+            if (score >= 80) return 'A';
+            if (score >= 70) return 'B';
+            if (score >= 60) return 'C';
+            if (score >= 50) return 'D';
+            return 'F';
+        }
+
+        function resetQuiz() {
+            userAnswers = {};
+            displayQuiz();
+            scoreSection.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.querySelector('.card').appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            document.querySelector('.card').appendChild(successDiv);
+            setTimeout(() => successDiv.remove(), 5000);
+        }
+
+        // Initialize
+        toggleInputType();
+    </script>
+</body>
+</html> 
